@@ -8,7 +8,8 @@ mod keymap;
 
 use defmt::{info, unwrap};
 use embassy_executor::Spawner;
-use embassy_nrf::gpio::{Input, Output};
+// use embassy_nrf::gpio::{Input, Output};
+use embassy_nrf::gpio::{Input};
 use embassy_nrf::interrupt::{self, InterruptExt};
 use embassy_nrf::mode::Async;
 use embassy_nrf::peripherals::{RNG, SAADC, USBD};
@@ -34,7 +35,8 @@ use rmk::input_device::adc::{AnalogEventType, NrfAdc};
 use rmk::input_device::battery::BatteryProcessor;
 use rmk::input_device::rotary_encoder::{DefaultPhase, RotaryEncoder};
 use rmk::keyboard::Keyboard;
-use rmk::matrix::Matrix;
+//use rmk::matrix::Matrix;
+use rmk::direct_pin::DirectPinMatrix;
 use rmk::{HostResources, initialize_encoder_keymap_and_storage, run_devices, run_processor_chain, run_rmk};
 use static_cell::StaticCell;
 use vial::{VIAL_KEYBOARD_DEF, VIAL_KEYBOARD_ID};
@@ -147,7 +149,7 @@ async fn main(spawner: Spawner) {
     let flash = Flash::take(mpsl, p.NVMC);
 
     // Initialize IO Pins
-    let (row_pins, col_pins) = config_matrix_pins_nrf!(peripherals: p, input: [P0_30, P0_31, P0_29, P0_27, P1_13], output:  [P0_28, P0_03, P1_10, P0_02, P0_06, P1_11, P0_13, P0_24, P0_09, P0_10, P1_00, P1_02, P1_03, P1_05]);
+    // let (row_pins, col_pins) = config_matrix_pins_nrf!(peripherals: p, input: [P0_30, P0_31, P0_29, P0_27, P1_13], output:  [P0_28, P0_03, P1_10, P0_02, P0_06, P1_11, P0_13, P0_24, P0_09, P0_10, P1_00, P1_02, P1_03, P1_05]);
 
     // Initialize the ADC.
     // We are only using one channel for detecting battery level
@@ -198,13 +200,31 @@ async fn main(spawner: Spawner) {
 
     // Initialize the matrix and keyboard
     let debouncer = DefaultDebouncer::new();
-    let mut matrix = Matrix::<_, _, _, ROW, COL, true>::new(row_pins, col_pins, debouncer);
-    // let mut matrix = TestMatrix::<ROW, COL>::new();
+    // let mut matrixs = Matrix::<_, _, _, ROW, COL, true>::new(row_pins, col_pins, debouncer);
+    const SIZE: usize = 9;
+    let direct_pins: [[Option<Input<'_>>; 3]; 3] = [
+        [
+            Some(Input::new(p.P0_13, embassy_nrf::gpio::Pull::Up)),
+            Some(Input::new(p.P0_15, embassy_nrf::gpio::Pull::Up)),
+            Some(Input::new(p.P0_17, embassy_nrf::gpio::Pull::Up)),
+        ],
+        [
+            Some(Input::new(p.P0_24, embassy_nrf::gpio::Pull::Up)),
+            Some(Input::new(p.P0_22, embassy_nrf::gpio::Pull::Up)),
+            Some(Input::new(p.P0_20, embassy_nrf::gpio::Pull::Up)),
+        ],
+        [
+            Some(Input::new(p.P1_06, embassy_nrf::gpio::Pull::Up)),
+            Some(Input::new(p.P1_04, embassy_nrf::gpio::Pull::Up)),
+            Some(Input::new(p.P1_00, embassy_nrf::gpio::Pull::Up)),
+        ],
+    ];
+    let mut matrix: DirectPinMatrix<_, DefaultDebouncer<ROW, COL>, ROW, COL, _> = ::rmk::direct_pin::DirectPinMatrix::<_, _, ROW, COL, SIZE>::new(direct_pins, debouncer, true );    
     let mut keyboard = Keyboard::new(&keymap);
 
     // Initialize the encoder
-    let pin_a = Input::new(p.P1_06, embassy_nrf::gpio::Pull::None);
-    let pin_b = Input::new(p.P1_04, embassy_nrf::gpio::Pull::None);
+    let pin_a = Input::new(p.P1_11, embassy_nrf::gpio::Pull::None);
+    let pin_b = Input::new(p.P0_12, embassy_nrf::gpio::Pull::None);
     let mut encoder = RotaryEncoder::with_phase(pin_a, pin_b, DefaultPhase, 0);
 
     let mut adc_device = NrfAdc::new(
