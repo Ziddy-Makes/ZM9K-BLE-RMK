@@ -1,32 +1,62 @@
-# RMK 
+# nrf52840 BLE example
 
-RMK is a feature-rich and easy-to-use keyboard firmware.
+RMK supports [nice!nano](https://nicekeyboards.com/nice-nano) as well as any custom nrf52840 board you have. 
 
-## uf2 support
+## Nice!nano support
 
-If you’re using the Adafruit_nRF52_Bootloader (pre-installed on the nice!nano), you’re in luck! This bootloader supports the .uf2 firmware format, which eliminates the need for a debugging probe to flash your firmware. RMK uses the `cargo-make` tool to generate .uf2 firmware, with the generation process defined in the `Makefile.toml`.
+nice!nano has the [Adafruit_nRF52_Bootloader](https://github.com/adafruit/Adafruit_nRF52_Bootloader) built-in, which supports .uf2 firmware format. That means you don't need any debugging probe to flash your firmware. RMK uses `cargo-make` tool to generate .uf2 firmware, then generation processing is defined in `Makefile.toml`
 
-Follow these steps to generate and flash the .uf2 firmware with RMK:
+The following are steps of how to get .uf2 firmware work in RMK:
 
 1. Get `cargo-make` tool:
    ```shell
    cargo install --force cargo-make
    ```
-2. Compile RMK and generates .uf2 firmware:
+2. Compile RMK and get .uf2:
    ```shell
    cargo make uf2 --release
    ```
 3. Flash
 
-   - Put your board into bootloader mode. A USB drive will appear on your computer.
-   - Drag and drop the generated .uf2 firmware file onto the USB drive. The RMK firmware will be automatically flashed onto your microcontroller.
+   Set your nice!nano to bootloader mode, a USB drive will show. Just drag the .uf2 firmware to USB drive. RMK will be automatically flashed. Check nice!nano's document: https://nicekeyboards.com/docs/nice-nano/getting-started#flashing-firmware-and-bootloaders. 
 
-   For additional details on entering bootloader mode and flashing firmware, refer to the [nice!nano documentation](https://nicekeyboards.com/docs/nice-nano/getting-started#flashing-firmware-and-bootloaders)
+Note that RMK will switch to USB mode if an USB cable is connected. Remember to remove USB cable after flashing!
 
-### Tips for nRF52840
+You can also check the instruction [here](https://nicekeyboards.com/docs/nice-nano/) for more info about nice!nano.
 
-Most nice!nano compatible boards have bootloader with SoftDevice pre-flashed. Since v0.7.x, RMK will remove old SoftDevice Bluetooth stack and replace it with its own. So if you want to rollback to v0.6.x, or switch to firmwares that use SoftDevice stack(for example, zmk), you will need to [re-flash the bootloader](https://nicekeyboards.com/docs/nice-nano/troubleshooting#my-nicenano-seems-to-be-acting-up-and-i-want-to-re-flash-the-bootloader).
+## With debugging probe
 
-### Additional notes
+With a debugging probe, you can have the full control of you hardware. To use RMK you should check whether the bootloader is flashed to your board first. To use RMK with existing bootloader such as [Adafruit_nRF52_Bootloader](https://github.com/adafruit/Adafruit_nRF52_Bootloader), check `memory.x` in the project root, ensure that the flash starts from 0x00001000
 
-RMK defaults to USB-priority mode if a USB cable is connected. After flashing, remember to disconnect the USB cable, or [switch to BLE-priority mode](https://rmk.rs/docs/features/wireless.html#multiple-profile-support) by pressing User11(Switch Output) key.
+```
+MEMORY
+{
+  /* NOTE 1 K = 1 KiB = 1024 bytes */
+  /* These values correspond to the nRF52840 WITH Adafruit nRF52 bootloader */
+  FLASH : ORIGIN = 0x00001000, LENGTH = 1020K
+  RAM : ORIGIN = 0x20000008, LENGTH = 255K
+}
+```
+
+Or you can use RMK without bootloader:
+
+```
+MEMORY
+{
+  /* NOTE 1 K = 1 KiB = 1024 bytes */
+  /* These values correspond to the nRF52840 */
+  FLASH : ORIGIN = 0x00000000, LENGTH = 1024K
+  RAM : ORIGIN = 0x20000000, LENGTH = 256K
+}
+```
+
+After you have `memory.x` set, use `cargo run --release` to flash the RMK firmware to your board:
+
+1. Enter example folder:
+   ```shell
+   cd examples/use_rust/nrf52840_ble
+   ```
+2. Compile, flash and run the example
+   ```shell
+   cargo run --release
+   ```

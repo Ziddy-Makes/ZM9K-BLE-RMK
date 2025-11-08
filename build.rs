@@ -20,7 +20,6 @@ use xz2::read::XzEncoder;
 
 fn main() {
     // Generate vial config at the root of project
-    println!("cargo:rerun-if-changed=vial.json");
     generate_vial_config();
 
     // Put `memory.x` in our output directory and ensure it's
@@ -38,8 +37,6 @@ fn main() {
     // `memory.x` is changed.
     println!("cargo:rerun-if-changed=memory.x");
 
-    println!("cargo:rerun-if-changed=keyboard.toml");
-
     // Specify linker arguments.
 
     // `--nmagic` is required if memory section addresses are not aligned to 0x10000,
@@ -52,13 +49,11 @@ fn main() {
 
     // Set the extra linker script from defmt
     println!("cargo:rustc-link-arg=-Tdefmt.x");
-
-    // Use flip-link overflow check: https://github.com/knurling-rs/flip-link
-    println!("cargo:rustc-linker=flip-link");
 }
 
 fn generate_vial_config() {
     // Generated vial config file
+    println!("cargo:rerun-if-changed=vial.json");
     let out_file = Path::new(&env::var_os("OUT_DIR").unwrap()).join("config_generated.rs");
 
     let p = Path::new("vial.json");

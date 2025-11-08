@@ -4,19 +4,14 @@ install_crate = { rustup_component_name = "llvm-tools" }
 [tasks.flip-link]
 install_crate = { crate_name = "flip-link", binary = "flip-link", test_arg = ["-h"] }
 
-[tasks.build]
-command = "cargo"
-args = ["build", "--release"]
-dependencies = ["install-llvm-tools", "flip-link"]
-
 [tasks.objcopy]
 install_crate = { crate_name = "cargo-binutils", binary = "cargo", test_arg = [
     "objcopy",
     "--help",
 ] }
 command = "cargo"
-args = ["objcopy", "--release", "--", "-O", "ihex", "ZM9K-BLE.hex"]
-dependencies = ["build"]
+args = ["objcopy", "--release", "--", "-O", "ihex", "rmk.hex"]
+dependencies = ["install-llvm-tools", "flip-link"]
 
 [tasks.uf2]
 install_crate = { crate_name = "cargo-hex-to-uf2", binary = "cargo", test_arg = [
@@ -27,9 +22,9 @@ command = "cargo"
 args = [
     "hex-to-uf2",
     "--input-path",
-    "ZM9K-BLE.hex",
+    "rmk.hex",
     "--output-path",
-    "ZM9K-BLE.uf2",
+    "rmk.uf2",
     "--family",
     "nrf52840",
 ]
