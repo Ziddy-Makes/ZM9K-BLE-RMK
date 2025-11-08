@@ -108,6 +108,7 @@ async fn main(spawner: Spawner) {
     // Initialize the peripherals and nrf-sdc controller
     let mut nrf_config = embassy_nrf::config::Config::default();
     nrf_config.dcdc.reg0_voltage = Some(embassy_nrf::config::Reg0Voltage::_3V3);
+    //! Requaired to disable both DCDC regulators for normal voltage
     nrf_config.dcdc.reg0 = false;
     nrf_config.dcdc.reg1 = false;
     let p = embassy_nrf::init(nrf_config);
@@ -160,8 +161,8 @@ async fn main(spawner: Spawner) {
     let keyboard_device_config = DeviceConfig {
         vid: 0x4c4b,
         pid: 0x4643,
-        manufacturer: "Haobo",
-        product_name: "RMK Keyboard",
+        manufacturer: "Ziddy Makes",
+        product_name: "ZM9K - BLE",
         serial_number: "vial:f64c2b3c:000001",
     };
     let vial_config = VialConfig::new(VIAL_KEYBOARD_ID, VIAL_KEYBOARD_DEF, UNLOCK_KEYS);

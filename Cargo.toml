@@ -1,12 +1,12 @@
 [package]
-name = "rmk-nrf52840"
+name = "ZM9K-BLE-RMK"
 version = "0.2.0"
-authors = ["Haobo Gu <haobogu@outlook.com>"]
+authors = ["Alex Zidros"]
 description = "Keyboard firmware written in Rust"
 homepage = "https://github.com/haobogu/rmk"
 repository = "https://github.com/haobogu/rmk"
 readme = "../../README.md"
-edition = "2024"
+edition = "2025"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
@@ -62,7 +62,7 @@ json = "0.12"
 const-gen = "1.6"
 
 [[bin]]
-name = "rmk-nrf52840"
+name = "ZM9K-BLE-RMK"
 test = false
 bench = false
 

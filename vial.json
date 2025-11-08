@@ -1,5 +1,5 @@
 {
-    "name": "RMK Keyboard",
+    "name": "ZM9K - BLE",
     "vendorId": "0x4C4B",
     "productId": "0x4643",
     "lighting": "none",
@@ -64,7 +64,9 @@
                     "w": 2
                 },
                 "0,13",
-                {"x":0.25},
+                {
+                    "x": 0.25
+                },
                 "0,0\n\n\n\n\n\n\n\n\ne",
                 "0,1\n\n\n\n\n\n\n\n\ne"
             ],
