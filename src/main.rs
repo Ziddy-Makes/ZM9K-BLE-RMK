@@ -153,8 +153,8 @@ async fn main(spawner: Spawner) {
 
     // Initialize the ADC.
     // We are only using one channel for detecting battery level
-    let adc_pin = p.P0_05.degrade_saadc();
-    let is_charging_pin = Input::new(p.P1_09, embassy_nrf::gpio::Pull::Up);
+    let adc_pin = p.P0_04.degrade_saadc();
+    // let is_charging_pin = Input::new(p.P1_09, embassy_nrf::gpio::Pull::Up);
     let saadc = init_adc(adc_pin, p.SAADC);
     // Wait for ADC calibration.
     saadc.calibrate().await;
@@ -168,10 +168,11 @@ async fn main(spawner: Spawner) {
         serial_number: "vial:f64c2b3c:000001",
     };
     let vial_config = VialConfig::new(VIAL_KEYBOARD_ID, VIAL_KEYBOARD_DEF, UNLOCK_KEYS);
-    let ble_battery_config = BleBatteryConfig::new(Some(is_charging_pin), true, None, false);
+    // let ble_battery_config = BleBatteryConfig::new(Some(is_charging_pin), true, None, false);
+    let ble_battery_config = BleBatteryConfig::new(None, true, None, false);
     let storage_config = StorageConfig {
         start_addr: 0xA0000, // FIXME: use 0x70000 after we can build without softdevice controller
-        num_sectors: 6,
+        num_sectors: 24,
         ..Default::default()
     };
     let rmk_config = RmkConfig {
@@ -223,7 +224,7 @@ async fn main(spawner: Spawner) {
     let mut keyboard = Keyboard::new(&keymap);
 
     // Initialize the encoder
-    let pin_a = Input::new(p.P1_11, embassy_nrf::gpio::Pull::None);
+    let pin_a = Input::new(p.P1_09, embassy_nrf::gpio::Pull::None);
     let pin_b = Input::new(p.P0_12, embassy_nrf::gpio::Pull::None);
     let mut encoder = RotaryEncoder::with_phase(pin_a, pin_b, DefaultPhase, 0);
 
