@@ -1,0 +1,3 @@
+[rmk]
+# Space size in bytes for storing macro sequences, default value is 256 [bytes]
+macro_space_size = 2048

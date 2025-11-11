@@ -172,7 +172,7 @@ async fn main(spawner: Spawner) {
     let ble_battery_config = BleBatteryConfig::new(None, true, None, false);
     let storage_config = StorageConfig {
         start_addr: 0xA0000, // FIXME: use 0x70000 after we can build without softdevice controller
-        num_sectors: 24,
+        num_sectors: 12, // Sectors are 4KB each on nRF52840 -- 24 sectors = 96KB
         ..Default::default()
     };
     let rmk_config = RmkConfig {
