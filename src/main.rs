@@ -17,7 +17,7 @@ use embassy_nrf::saadc::{self, AnyInput, Input as _, Saadc};
 use embassy_nrf::usb::Driver;
 use embassy_nrf::usb::vbus_detect::HardwareVbusDetect;
 use embassy_nrf::{Peri, bind_interrupts, pac, rng, usb};
-use keymap::{COL, ROW};
+use keymap::{COL, ROW, SIZE};
 use nrf_mpsl::Flash;
 use nrf_sdc::mpsl::MultiprotocolServiceLayer;
 use nrf_sdc::{self as sdc, mpsl};
@@ -33,10 +33,8 @@ use rmk::futures::future::join4;
 use rmk::input_device::Runnable;
 use rmk::input_device::adc::{AnalogEventType, NrfAdc};
 use rmk::input_device::battery::BatteryProcessor;
-use rmk::input_device::rotary_encoder::{DefaultPhase, RotaryEncoder};
+use rmk::input_device::rotary_encoder::{RotaryEncoder};
 use rmk::keyboard::Keyboard;
-//use rmk::matrix::Matrix;
-use rmk::direct_pin::DirectPinMatrix;
 use rmk::{HostResources, initialize_encoder_keymap_and_storage, run_devices, run_processor_chain, run_rmk};
 use static_cell::StaticCell;
 use vial::{VIAL_KEYBOARD_DEF, VIAL_KEYBOARD_ID};
@@ -173,7 +171,8 @@ async fn main(spawner: Spawner) {
     let storage_config = StorageConfig {
         start_addr: 0xA0000, // FIXME: use 0x70000 after we can build without softdevice controller
         num_sectors: 12, // Sectors are 4KB each on nRF52840 -- 24 sectors = 96KB
-        ..Default::default()
+        clear_storage: true,
+        clear_layout: true,
     };
     let rmk_config = RmkConfig {
         device_config: keyboard_device_config,
@@ -200,33 +199,25 @@ async fn main(spawner: Spawner) {
     .await;
 
     // Initialize the matrix and keyboard
+    #[rustfmt::skip]
+    let direct_pins = config_matrix_pins_nrf! {
+        peripherals: p,
+        direct_pins: [
+            [P0_13, P0_15, P0_17, _],
+            [P0_24, P0_22, P0_20, _],
+            [P1_06, P1_04, P1_00, _],
+            [P0_11,     _,     _, _],
+        ]
+    };
+
     let debouncer = DefaultDebouncer::new();
-    // let mut matrixs = Matrix::<_, _, _, ROW, COL, true>::new(row_pins, col_pins, debouncer);
-    const SIZE: usize = 9;
-    let direct_pins: [[Option<Input<'_>>; 3]; 3] = [
-        [
-            Some(Input::new(p.P0_13, embassy_nrf::gpio::Pull::Up)),
-            Some(Input::new(p.P0_15, embassy_nrf::gpio::Pull::Up)),
-            Some(Input::new(p.P0_17, embassy_nrf::gpio::Pull::Up)),
-        ],
-        [
-            Some(Input::new(p.P0_24, embassy_nrf::gpio::Pull::Up)),
-            Some(Input::new(p.P0_22, embassy_nrf::gpio::Pull::Up)),
-            Some(Input::new(p.P0_20, embassy_nrf::gpio::Pull::Up)),
-        ],
-        [
-            Some(Input::new(p.P1_06, embassy_nrf::gpio::Pull::Up)),
-            Some(Input::new(p.P1_04, embassy_nrf::gpio::Pull::Up)),
-            Some(Input::new(p.P1_00, embassy_nrf::gpio::Pull::Up)),
-        ],
-    ];
-    let mut matrix: DirectPinMatrix<_, DefaultDebouncer<ROW, COL>, ROW, COL, _> = ::rmk::direct_pin::DirectPinMatrix::<_, _, ROW, COL, SIZE>::new(direct_pins, debouncer, true );    
+    let mut matrix = ::rmk::direct_pin::DirectPinMatrix::<_, _, ROW, COL, SIZE>::new(direct_pins, debouncer, true );    
     let mut keyboard = Keyboard::new(&keymap);
 
     // Initialize the encoder
-    let pin_a = Input::new(p.P1_09, embassy_nrf::gpio::Pull::None);
-    let pin_b = Input::new(p.P0_12, embassy_nrf::gpio::Pull::None);
-    let mut encoder = RotaryEncoder::with_phase(pin_a, pin_b, DefaultPhase, 0);
+    let pin_a = Input::new(p.P1_09, embassy_nrf::gpio::Pull::Up);
+    let pin_b = Input::new(p.P0_12, embassy_nrf::gpio::Pull::Up);
+    let mut encoder = RotaryEncoder::with_resolution(pin_a, pin_b, 4, false, 0);
 
     let mut adc_device = NrfAdc::new(
         saadc,

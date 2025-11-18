@@ -1,52 +1,61 @@
 use rmk::types::action::{EncoderAction, KeyAction};
 use rmk::{a, encoder, k, layer};
-pub(crate) const COL: usize = 3;
-pub(crate) const ROW: usize = 3;
+pub(crate) const COL: usize = 4;
+pub(crate) const ROW: usize = 4;
+pub(crate) const SIZE: usize = 16; // Rows * Cols
 pub(crate) const NUM_LAYER: usize = 8;
-pub(crate) const NUM_ENCODER: usize = 2;
+pub(crate) const NUM_ENCODER: usize = 1;
 
 #[rustfmt::skip]
 pub const fn get_default_keymap() -> [[[KeyAction; COL]; ROW]; NUM_LAYER] {
     [
         layer!([
-            [k!(Grave), k!(Kc1), k!(Kc2)],
-            [k!(Tab), k!(Q), k!(W)],
-            [k!(Escape), k!(A), k!(S)]
+            [k!(A),         k!(B),         k!(C),         a!(No)],
+            [k!(D),         k!(E),         k!(F),         a!(No)],
+            [k!(G),         k!(H),         k!(I),         a!(No)],
+            [k!(KbMute),    a!(No),        a!(No),         a!(No)]
         ]),
         layer!([
-            [k!(Grave), k!(F1), k!(F2)],
-            [a!(No), a!(No), a!(No)],
-            [k!(CapsLock), a!(No), a!(No)]
+            [k!(User1),     k!(User2),     k!(User3),     a!(No)],
+            [a!(No),        a!(No),        a!(No),        a!(No)],
+            [a!(No),        a!(No),        k!(User6),      a!(No)],
+            [a!(No),        a!(No),        a!(No),        a!(No)]
         ]),
         layer!([
-            [k!(Grave), k!(F1), k!(F2)],
-            [a!(No), a!(No), a!(No)],
-            [k!(CapsLock), a!(No), a!(No)]
+            [k!(Grave),     k!(F1),        k!(F2),        a!(No)],
+            [a!(No),        a!(No),        a!(No),        a!(No)],
+            [k!(CapsLock),  a!(No),        a!(No),        a!(No)],
+            [k!(CapsLock),  a!(No),        a!(No),        a!(No)]
         ]),
         layer!([
-            [k!(Grave), k!(F1), k!(F2)],
-            [a!(No), a!(No), a!(No)],
-            [k!(CapsLock), a!(No), a!(No)]
+            [k!(Grave),     k!(F1),        k!(F2),        a!(No)],
+            [a!(No),        a!(No),        a!(No),        a!(No)],
+            [k!(CapsLock),  a!(No),        a!(No),        a!(No)],
+            [k!(CapsLock),  a!(No),        a!(No),        a!(No)]
         ]),
         layer!([
-            [k!(Grave), k!(F1), k!(F2)],
-            [a!(No), a!(No), a!(No)],
-            [k!(CapsLock), a!(No), a!(No)]
+            [k!(Grave),     k!(F1),        k!(F2),        a!(No)],
+            [a!(No),        a!(No),        a!(No),        a!(No)],
+            [k!(CapsLock),  a!(No),        a!(No),        a!(No)],
+            [k!(CapsLock),  a!(No),        a!(No),        a!(No)]
         ]),
         layer!([
-            [k!(Grave), k!(F1), k!(F2)],
-            [a!(No), a!(No), a!(No)],
-            [k!(CapsLock), a!(No), a!(No)]
+            [k!(Grave),     k!(F1),        k!(F2),        a!(No)],
+            [a!(No),        a!(No),        a!(No),        a!(No)],
+            [k!(CapsLock),  a!(No),        a!(No),        a!(No)],
+            [k!(CapsLock),  a!(No),        a!(No),        a!(No)]
         ]),
         layer!([
-            [k!(Grave), k!(F1), k!(F2)],
-            [a!(No), a!(No), a!(No)],
-            [k!(CapsLock), a!(No), a!(No)]
+            [k!(Grave),     k!(F1),        k!(F2),        a!(No)],
+            [a!(No),        a!(No),        a!(No),        a!(No)],
+            [k!(CapsLock),  a!(No),        a!(No),        a!(No)],
+            [k!(CapsLock),  a!(No),        a!(No),        a!(No)]
         ]),
         layer!([
-            [k!(Grave), k!(F1), k!(F2)],
-            [a!(No), a!(No), a!(No)],
-            [k!(CapsLock), a!(No), a!(No)]
+            [k!(Grave),     k!(F1),        k!(F2),        a!(No)],
+            [a!(No),        a!(No),        a!(No),        a!(No)],
+            [k!(CapsLock),  a!(No),        a!(No),        a!(No)],
+            [k!(CapsLock),  a!(No),        a!(No),        a!(No)]
         ]),
     ]
 }
@@ -55,35 +64,33 @@ pub const fn get_default_encoder_map() -> [[EncoderAction; NUM_ENCODER]; NUM_LAY
     [
         [
             encoder!(k!(KbVolumeUp), k!(KbVolumeDown)),
-            encoder!(k!(KbVolumeUp), k!(KbVolumeDown)),
         ],
         [
-            encoder!(k!(No), k!(No)),
-            encoder!(k!(No), k!(No)),
+            encoder!(k!(No), k!(No))
         ],
         [
-            encoder!(k!(No), k!(No)),
-            encoder!(k!(No), k!(No)),
+            encoder!(k!(No), k!(No))
+
         ],
         [
-            encoder!(k!(No), k!(No)),
-            encoder!(k!(No), k!(No)),
+            encoder!(k!(No), k!(No))
+
         ],
         [
-            encoder!(k!(No), k!(No)),
-            encoder!(k!(No), k!(No)),
+            encoder!(k!(No), k!(No))
+
         ],
         [
-            encoder!(k!(No), k!(No)),
-            encoder!(k!(No), k!(No)),
+            encoder!(k!(No), k!(No))
+
         ],
         [
-            encoder!(k!(No), k!(No)),
-            encoder!(k!(No), k!(No)),
+            encoder!(k!(No), k!(No))
+
         ],
         [
-            encoder!(k!(No), k!(No)),
-            encoder!(k!(No), k!(No)),
+            encoder!(k!(No), k!(No))
+
         ],
     ]
 }
