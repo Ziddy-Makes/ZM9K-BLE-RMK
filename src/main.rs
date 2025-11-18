@@ -5,11 +5,12 @@ mod vial;
 #[macro_use]
 mod macros;
 mod keymap;
+mod ble_controller_event_subscriber;
 
 use defmt::{info, unwrap};
 use embassy_executor::Spawner;
 // use embassy_nrf::gpio::{Input, Output};
-use embassy_nrf::gpio::{Input};
+use embassy_nrf::gpio::{Input, Output};
 use embassy_nrf::interrupt::{self, InterruptExt};
 use embassy_nrf::mode::Async;
 use embassy_nrf::peripherals::{RNG, SAADC, USBD};
@@ -29,16 +30,18 @@ use rmk::config::{
     BehaviorConfig, BleBatteryConfig, DeviceConfig, PositionalConfig, RmkConfig, StorageConfig, VialConfig,
 };
 use rmk::debounce::default_debouncer::DefaultDebouncer;
-use rmk::futures::future::join4;
+use rmk::futures::future::{join, join4};
 use rmk::input_device::Runnable;
 use rmk::input_device::adc::{AnalogEventType, NrfAdc};
 use rmk::input_device::battery::BatteryProcessor;
 use rmk::input_device::rotary_encoder::{RotaryEncoder};
 use rmk::keyboard::Keyboard;
+use rmk::controller::EventController;
 use rmk::{HostResources, initialize_encoder_keymap_and_storage, run_devices, run_processor_chain, run_rmk};
 use static_cell::StaticCell;
 use vial::{VIAL_KEYBOARD_DEF, VIAL_KEYBOARD_ID};
 use {defmt_rtt as _, panic_probe as _};
+use ble_controller_event_subscriber::BleConnectionLedController;
 
 bind_interrupts!(struct Irqs {
     USBD => usb::InterruptHandler<USBD>;
@@ -171,8 +174,8 @@ async fn main(spawner: Spawner) {
     let storage_config = StorageConfig {
         start_addr: 0xA0000, // FIXME: use 0x70000 after we can build without softdevice controller
         num_sectors: 12, // Sectors are 4KB each on nRF52840 -- 24 sectors = 96KB
-        clear_storage: true,
-        clear_layout: true,
+        clear_storage: false,
+        clear_layout: false,
     };
     let rmk_config = RmkConfig {
         device_config: keyboard_device_config,
@@ -226,6 +229,11 @@ async fn main(spawner: Spawner) {
         None,
     );
     let mut batt_proc = BatteryProcessor::new(2000, 2806, &keymap);
+    let led_pin = Output::new(p.P0_06, embassy_nrf::gpio::Level::Low, embassy_nrf::gpio::OutputDrive::Standard);
+    let mut ble_led = BleConnectionLedController::new(led_pin, false);
+
+    //ble_led.event_loop().await;
+    
 
     join4(
         run_devices! (
@@ -235,7 +243,10 @@ async fn main(spawner: Spawner) {
             EVENT_CHANNEL => [batt_proc],
         },
         keyboard.run(), // Keyboard is special
-        run_rmk(&keymap, driver, &stack, &mut storage, rmk_config),
+        join(
+            ble_led.event_loop(),
+            run_rmk(&keymap, driver, &stack, &mut storage, rmk_config)
+        )
     )
     .await;
 }
