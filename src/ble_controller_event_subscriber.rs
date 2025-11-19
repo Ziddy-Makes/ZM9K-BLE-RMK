@@ -56,6 +56,13 @@ impl<'d, const N: usize> BleConnectionLedController<'d, N> {
         self.leds_on = true;
     }
 
+    fn set_all_leds_green(&mut self) {
+        self.power_pin.set_high();
+        let data = [RGB8 { r: 0, g: 15, b: 0 }; N];
+        let _ = self.ws2812.write(data.iter().cloned());
+        self.leds_on = true;
+    }
+
     fn clear_all_leds(&mut self) {
         let data = [RGB8::default(); N];
         let _ = self.ws2812.write(data.iter().cloned());
@@ -76,10 +83,18 @@ impl<'d, const N: usize> Controller for BleConnectionLedController<'d, N> {
                     self.should_blink = true;
                 }
                 BleState::Connected => {
-                    // Stop blinking, turn off LEDs when connected
+                    // Stop blinking and blink green 3 times
                     self.should_blink = false;
                     info!("Connected - Custom Controller");
-                    self.clear_all_leds();
+
+                    // Blink green 3 times
+                    for _ in 0..3 {
+                        self.set_all_leds_green();
+                        embassy_time::Timer::after(embassy_time::Duration::from_millis(500)).await;
+                        self.clear_all_leds();
+                        embassy_time::Timer::after(embassy_time::Duration::from_millis(500)).await;
+                    }
+
                     self.activate();
                 }
                 BleState::None => {

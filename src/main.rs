@@ -38,15 +38,13 @@ use rmk::input_device::adc::{AnalogEventType, NrfAdc};
 use rmk::input_device::battery::BatteryProcessor;
 use rmk::input_device::rotary_encoder::{RotaryEncoder};
 use rmk::keyboard::Keyboard;
-use rmk::controller::{EventController, PollingController};
+use rmk::controller::{PollingController};
 use rmk::{HostResources, initialize_encoder_keymap_and_storage, run_devices, run_processor_chain, run_rmk};
 use static_cell::StaticCell;
 use vial::{VIAL_KEYBOARD_DEF, VIAL_KEYBOARD_ID};
 use {defmt_rtt as _, panic_probe as _};
 use ble_controller_event_subscriber::BleConnectionLedController;
 use led_animation::LedAnimator;
-use embassy_time::Timer;
-use smart_leds::{SmartLedsWrite, RGB8};
 use ws2812_spi::Ws2812;
 bind_interrupts!(struct Irqs {
     USBD => usb::InterruptHandler<USBD>;
@@ -199,6 +197,10 @@ async fn main(spawner: Spawner) {
     let mut default_keymap = keymap::get_default_keymap();
     let mut key_config = PositionalConfig::default();
     let mut behavior_config = BehaviorConfig::default();
+
+    // Configure tapdance behaviors
+    keymap::configure_tapdance(&mut behavior_config);
+
     let mut encoder_map = keymap::get_default_encoder_map();
     let (keymap, mut storage) = initialize_encoder_keymap_and_storage(
         &mut default_keymap,
