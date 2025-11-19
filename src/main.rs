@@ -257,8 +257,7 @@ async fn main(spawner: Spawner) {
     led_animator.bootup_animation().await;
     let (ws2812, mosfet_sk_pwr_ctrl) = led_animator.take();
 
-    let led_pin = Output::new(p.P0_06, embassy_nrf::gpio::Level::Low, embassy_nrf::gpio::OutputDrive::Standard);
-    let mut ble_led = BleConnectionLedController::<NUM_LEDS>::new(led_pin, ws2812, mosfet_sk_pwr_ctrl, false);
+    let mut ble_led = BleConnectionLedController::<NUM_LEDS>::new(ws2812, mosfet_sk_pwr_ctrl);
 
     join4(
         run_devices! (

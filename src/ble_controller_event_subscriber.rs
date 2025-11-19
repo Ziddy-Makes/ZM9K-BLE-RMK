@@ -11,43 +11,24 @@ use embassy_nrf::spim::Spim;
 
 
 pub struct BleConnectionLedController<'d, const N: usize> {
-    pin: Output<'d>,
     ws2812: Ws2812<Spim<'d>>,
     power_pin: Output<'d>,
     sub: ControllerSub,
     should_blink: bool,
-    low_active: bool,
     leds_on: bool,
 }
 
 impl<'d, const N: usize> BleConnectionLedController<'d, N> {
-    pub fn new(pin: Output<'d>, ws2812: Ws2812<Spim<'d>>, power_pin: Output<'d>, low_active: bool) -> Self {
+    pub fn new(ws2812: Ws2812<Spim<'d>>, power_pin: Output<'d>) -> Self {
         Self {
-            pin,
             ws2812,
             power_pin,
             sub: unwrap!(CONTROLLER_CHANNEL.subscriber()),
             should_blink: false,
-            low_active,
             leds_on: false,
         }
     }
 
-    fn activate(&mut self) {
-        if self.low_active {
-            self.pin.set_low();
-        } else {
-            self.pin.set_high();
-        }
-    }
-
-    fn deactivate(&mut self) {
-        if self.low_active {
-            self.pin.set_high();
-        } else {
-            self.pin.set_low();
-        }
-    }
 
     fn set_all_leds_blue(&mut self) {
         self.power_pin.set_high();
@@ -94,15 +75,12 @@ impl<'d, const N: usize> Controller for BleConnectionLedController<'d, N> {
                         self.clear_all_leds();
                         embassy_time::Timer::after(embassy_time::Duration::from_millis(500)).await;
                     }
-
-                    self.activate();
                 }
                 BleState::None => {
                     // Turn off LEDs when not in BLE mode
                     self.should_blink = false;
                     info!("None - Custom Controller");
                     self.clear_all_leds();
-                    self.deactivate();
                 }
             }
         }
@@ -118,7 +96,6 @@ impl<'d, const N: usize> PollingController for BleConnectionLedController<'d, N>
 
     async fn update(&mut self) {
         if self.should_blink {
-            self.pin.toggle();
             if self.leds_on {
                 self.clear_all_leds();
             } else {
