@@ -17,6 +17,7 @@ dependencies = [
  "embassy-nrf",
  "embassy-time",
  "json",
+ "libm",
  "nrf-mpsl",
  "nrf-sdc",
  "panic-probe",
@@ -24,7 +25,9 @@ dependencies = [
  "rand_chacha",
  "rand_core 0.6.4",
  "rmk",
+ "smart-leds",
  "static_cell",
+ "ws2812-spi",
  "xz2",
 ]
 
@@ -1372,6 +1375,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "libm"
+version = "0.2.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f9fbbcab51052fe104eb5e5d351cf728d30a5be1fe14d9be8a3b097481fb97de"
+
+[[package]]
 name = "litrs"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1823,6 +1832,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
 
 [[package]]
+name = "rgb"
+version = "0.8.52"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c6a884d2998352bb4daf0183589aec883f16a6da1f4dde84d8e2e9a5409a1ce"
+
+[[package]]
 name = "rmk"
 version = "0.7.8"
 source = "git+https://github.com/HaoboGu/rmk?rev=f0872fa#f0872fa6f29cd84f6c93b77764264bac9cc0de4f"
@@ -2130,6 +2145,24 @@ name = "siphasher"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "56199f7ddabf13fe5074ce809e7d3f42b42ae711800501b5b16ea82ad029c39d"
+
+[[package]]
+name = "smart-leds"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "66df34e571fa9993fa6f99131a374d58ca3d694b75f9baac93458fe0d6057bf0"
+dependencies = [
+ "smart-leds-trait",
+]
+
+[[package]]
+name = "smart-leds-trait"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a7f4441a131924d58da6b83a7ad765c460e64630cce504376c3a87a2558c487f"
+dependencies = [
+ "rgb",
+]
 
 [[package]]
 name = "spin"
@@ -2599,6 +2632,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "21a0236b59786fed61e2a80582dd500fe61f18b5dca67a4a067d0bc9039339cf"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "ws2812-spi"
+version = "0.5.1"
+source = "git+https://github.com/aziddy/ws2812-spi-rs?branch=nrf52840_at4Mhz_support#cfd49a4aa166e3f7c61cd6bb2e894fc55b21da3e"
+dependencies = [
+ "embedded-hal 1.0.0",
+ "smart-leds-trait",
 ]
 
 [[package]]

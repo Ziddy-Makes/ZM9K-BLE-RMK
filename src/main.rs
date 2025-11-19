@@ -10,14 +10,15 @@ mod ble_controller_event_subscriber;
 use defmt::{info, unwrap};
 use embassy_executor::Spawner;
 // use embassy_nrf::gpio::{Input, Output};
-use embassy_nrf::gpio::{Input, Output};
+use embassy_nrf::gpio::{Level, Input, Output, OutputDrive};
 use embassy_nrf::interrupt::{self, InterruptExt};
 use embassy_nrf::mode::Async;
 use embassy_nrf::peripherals::{RNG, SAADC, USBD};
 use embassy_nrf::saadc::{self, AnyInput, Input as _, Saadc};
 use embassy_nrf::usb::Driver;
 use embassy_nrf::usb::vbus_detect::HardwareVbusDetect;
-use embassy_nrf::{Peri, bind_interrupts, pac, rng, usb};
+use embassy_nrf::{Peri, bind_interrupts, pac, rng, usb, peripherals, spim};
+
 use keymap::{COL, ROW, SIZE};
 use nrf_mpsl::Flash;
 use nrf_sdc::mpsl::MultiprotocolServiceLayer;
@@ -42,7 +43,9 @@ use static_cell::StaticCell;
 use vial::{VIAL_KEYBOARD_DEF, VIAL_KEYBOARD_ID};
 use {defmt_rtt as _, panic_probe as _};
 use ble_controller_event_subscriber::BleConnectionLedController;
-
+use embassy_time::Timer;
+use smart_leds::{SmartLedsWrite, RGB8};
+use ws2812_spi::Ws2812;
 bind_interrupts!(struct Irqs {
     USBD => usb::InterruptHandler<USBD>;
     SAADC => saadc::InterruptHandler;
@@ -52,6 +55,7 @@ bind_interrupts!(struct Irqs {
     RADIO => nrf_sdc::mpsl::HighPrioInterruptHandler;
     TIMER0 => nrf_sdc::mpsl::HighPrioInterruptHandler;
     RTC0 => nrf_sdc::mpsl::HighPrioInterruptHandler;
+    SPIM3 => spim::InterruptHandler<peripherals::SPI3>;
 });
 
 #[embassy_executor::task]
@@ -69,6 +73,8 @@ const L2CAP_RXQ: u8 = 3;
 const L2CAP_MTU: usize = 251;
 
 const UNLOCK_KEYS: &[(u8, u8)] = &[(0, 0), (0, 1)];
+
+const NUM_LEDS: usize = 9;
 
 fn build_sdc<'d, const N: usize>(
     p: nrf_sdc::Peripherals<'d>,
@@ -229,6 +235,25 @@ async fn main(spawner: Spawner) {
         None,
     );
     let mut batt_proc = BatteryProcessor::new(2000, 2806, &keymap);
+
+
+    let sk_pwr = Output::new(p.P0_25, Level::High, OutputDrive::Standard);
+
+    let mut spim_config = spim::Config::default();
+    spim_config.frequency = spim::Frequency::M4;
+
+    let spim = spim::Spim::new(p.SPI3, Irqs, p.P0_21, p.P0_28, p.P0_26, spim_config);
+    // Bit pattern that works for nRF52840 at 4MHz
+    let custom_patterns = [0b01000100, 0b01000111, 0b01110100, 0b01110111];
+    let mut ws2812 = Ws2812::new_with_custom_patterns(spim, custom_patterns);
+
+    let mut data = [RGB8::default(); NUM_LEDS];
+
+    data[0] = RGB8 { r: 50, g: 0, b: 0 };
+    ws2812.write(data.iter().cloned()).ok();
+    defmt::info!("Red");
+
+
     let led_pin = Output::new(p.P0_06, embassy_nrf::gpio::Level::Low, embassy_nrf::gpio::OutputDrive::Standard);
     let mut ble_led = BleConnectionLedController::new(led_pin, false);
 
