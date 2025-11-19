@@ -237,11 +237,10 @@ async fn main(spawner: Spawner) {
         embassy_time::Duration::from_secs(12),
         None,
     );
-    let mut batt_proc = BatteryProcessor::new(2000, 2806, &keymap);
+    let mut batt_proc = BatteryProcessor::new(1000, 1400, &keymap);
 
 
-    let mut sk_pwr = Output::new(p.P0_25, Level::Low, OutputDrive::Standard);
-    sk_pwr.set_high();
+    let mosfet_sk_pwr_ctrl = Output::new(p.P0_25, Level::Low, OutputDrive::Standard);
 
     let mut spim_config = spim::Config::default();
     spim_config.frequency = spim::Frequency::M4;
@@ -252,12 +251,12 @@ async fn main(spawner: Spawner) {
     let ws2812 = Ws2812::new_with_custom_patterns(spim, CUSTOM_PATTERNS);
 
     // Run bootup animation
-    let mut led_animator = LedAnimator::<NUM_LEDS>::new(ws2812);
+    let mut led_animator = LedAnimator::<NUM_LEDS>::new(ws2812, mosfet_sk_pwr_ctrl);
     led_animator.bootup_animation().await;
-    let ws2812 = led_animator.take();
+    let (ws2812, mosfet_sk_pwr_ctrl) = led_animator.take();
 
     let led_pin = Output::new(p.P0_06, embassy_nrf::gpio::Level::Low, embassy_nrf::gpio::OutputDrive::Standard);
-    let mut ble_led = BleConnectionLedController::<NUM_LEDS>::new(led_pin, ws2812, false);
+    let mut ble_led = BleConnectionLedController::<NUM_LEDS>::new(led_pin, ws2812, mosfet_sk_pwr_ctrl, false);
 
     join4(
         run_devices! (

@@ -13,6 +13,7 @@ use embassy_nrf::spim::Spim;
 pub struct BleConnectionLedController<'d, const N: usize> {
     pin: Output<'d>,
     ws2812: Ws2812<Spim<'d>>,
+    power_pin: Output<'d>,
     sub: ControllerSub,
     should_blink: bool,
     low_active: bool,
@@ -20,10 +21,11 @@ pub struct BleConnectionLedController<'d, const N: usize> {
 }
 
 impl<'d, const N: usize> BleConnectionLedController<'d, N> {
-    pub fn new(pin: Output<'d>, ws2812: Ws2812<Spim<'d>>, low_active: bool) -> Self {
+    pub fn new(pin: Output<'d>, ws2812: Ws2812<Spim<'d>>, power_pin: Output<'d>, low_active: bool) -> Self {
         Self {
             pin,
             ws2812,
+            power_pin,
             sub: unwrap!(CONTROLLER_CHANNEL.subscriber()),
             should_blink: false,
             low_active,
@@ -48,7 +50,8 @@ impl<'d, const N: usize> BleConnectionLedController<'d, N> {
     }
 
     fn set_all_leds_blue(&mut self) {
-        let data = [RGB8 { r: 43, g: 10, b: 0 }; N];
+        self.power_pin.set_high();
+        let data = [RGB8 { r: 0, g: 0, b: 15 }; N];
         let _ = self.ws2812.write(data.iter().cloned());
         self.leds_on = true;
     }
@@ -56,6 +59,7 @@ impl<'d, const N: usize> BleConnectionLedController<'d, N> {
     fn clear_all_leds(&mut self) {
         let data = [RGB8::default(); N];
         let _ = self.ws2812.write(data.iter().cloned());
+        self.power_pin.set_low();
         self.leds_on = false;
     }
 }
@@ -95,7 +99,7 @@ impl<'d, const N: usize> Controller for BleConnectionLedController<'d, N> {
 }
 
 impl<'d, const N: usize> PollingController for BleConnectionLedController<'d, N> {
-    const INTERVAL: embassy_time::Duration = embassy_time::Duration::from_millis(500);
+    const INTERVAL: embassy_time::Duration = embassy_time::Duration::from_millis(700);
 
     async fn update(&mut self) {
         if self.should_blink {
