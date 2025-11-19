@@ -4,23 +4,25 @@
 mod vial;
 #[macro_use]
 mod macros;
-mod keymap;
 mod ble_controller_event_subscriber;
+mod keymap;
 mod led_animation;
 
 use defmt::{info, unwrap};
 use embassy_executor::Spawner;
 // use embassy_nrf::gpio::{Input, Output};
-use embassy_nrf::gpio::{Level, Input, Output, OutputDrive};
+use embassy_nrf::gpio::{Input, Level, Output, OutputDrive};
 use embassy_nrf::interrupt::{self, InterruptExt};
 use embassy_nrf::mode::Async;
 use embassy_nrf::peripherals::{RNG, SAADC, USBD};
 use embassy_nrf::saadc::{self, AnyInput, Input as _, Saadc};
 use embassy_nrf::usb::Driver;
 use embassy_nrf::usb::vbus_detect::HardwareVbusDetect;
-use embassy_nrf::{Peri, bind_interrupts, pac, rng, usb, peripherals, spim};
+use embassy_nrf::{Peri, bind_interrupts, pac, peripherals, rng, spim, usb};
 
+use ble_controller_event_subscriber::BleConnectionLedController;
 use keymap::{COL, ROW, SIZE};
+use led_animation::LedAnimator;
 use nrf_mpsl::Flash;
 use nrf_sdc::mpsl::MultiprotocolServiceLayer;
 use nrf_sdc::{self as sdc, mpsl};
@@ -29,23 +31,24 @@ use rand_core::SeedableRng;
 use rmk::ble::build_ble_stack;
 use rmk::channel::EVENT_CHANNEL;
 use rmk::config::{
-    BehaviorConfig, BleBatteryConfig, DeviceConfig, PositionalConfig, RmkConfig, StorageConfig, VialConfig,
+    BehaviorConfig, BleBatteryConfig, DeviceConfig, PositionalConfig, RmkConfig, StorageConfig,
+    VialConfig,
 };
+use rmk::controller::PollingController;
 use rmk::debounce::default_debouncer::DefaultDebouncer;
 use rmk::futures::future::{join, join4};
 use rmk::input_device::Runnable;
 use rmk::input_device::adc::{AnalogEventType, NrfAdc};
 use rmk::input_device::battery::BatteryProcessor;
-use rmk::input_device::rotary_encoder::{RotaryEncoder};
+use rmk::input_device::rotary_encoder::RotaryEncoder;
 use rmk::keyboard::Keyboard;
-use rmk::controller::{PollingController};
-use rmk::{HostResources, initialize_encoder_keymap_and_storage, run_devices, run_processor_chain, run_rmk};
+use rmk::{
+    HostResources, initialize_encoder_keymap_and_storage, run_devices, run_processor_chain, run_rmk,
+};
 use static_cell::StaticCell;
 use vial::{VIAL_KEYBOARD_DEF, VIAL_KEYBOARD_ID};
-use {defmt_rtt as _, panic_probe as _};
-use ble_controller_event_subscriber::BleConnectionLedController;
-use led_animation::LedAnimator;
 use ws2812_spi::Ws2812;
+use {defmt_rtt as _, panic_probe as _};
 bind_interrupts!(struct Irqs {
     USBD => usb::InterruptHandler<USBD>;
     SAADC => saadc::InterruptHandler;
@@ -122,7 +125,8 @@ async fn main(spawner: Spawner) {
     nrf_config.dcdc.reg0 = false;
     nrf_config.dcdc.reg1 = false;
     let p = embassy_nrf::init(nrf_config);
-    let mpsl_p = mpsl::Peripherals::new(p.RTC0, p.TIMER0, p.TEMP, p.PPI_CH19, p.PPI_CH30, p.PPI_CH31);
+    let mpsl_p =
+        mpsl::Peripherals::new(p.RTC0, p.TIMER0, p.TEMP, p.PPI_CH19, p.PPI_CH30, p.PPI_CH31);
     let lfclk_cfg = mpsl::raw::mpsl_clock_lfclk_cfg_t {
         source: mpsl::raw::MPSL_CLOCK_LF_SRC_RC as u8,
         rc_ctiv: mpsl::raw::MPSL_RECOMMENDED_RC_CTIV as u8,
@@ -140,8 +144,8 @@ async fn main(spawner: Spawner) {
     )));
     spawner.must_spawn(mpsl_task(&*mpsl));
     let sdc_p = sdc::Peripherals::new(
-        p.PPI_CH17, p.PPI_CH18, p.PPI_CH20, p.PPI_CH21, p.PPI_CH22, p.PPI_CH23, p.PPI_CH24, p.PPI_CH25, p.PPI_CH26,
-        p.PPI_CH27, p.PPI_CH28, p.PPI_CH29,
+        p.PPI_CH17, p.PPI_CH18, p.PPI_CH20, p.PPI_CH21, p.PPI_CH22, p.PPI_CH23, p.PPI_CH24,
+        p.PPI_CH25, p.PPI_CH26, p.PPI_CH27, p.PPI_CH28, p.PPI_CH29,
     );
     let mut rng = rng::Rng::new(p.RNG, Irqs);
     let mut rng_gen = ChaCha12Rng::from_rng(&mut rng).unwrap();
@@ -180,9 +184,9 @@ async fn main(spawner: Spawner) {
     let ble_battery_config = BleBatteryConfig::new(None, true, None, false);
     let storage_config = StorageConfig {
         start_addr: 0xA0000, // FIXME: use 0x70000 after we can build without softdevice controller
-        num_sectors: 12, // Sectors are 4KB each on nRF52840 -- 24 sectors = 96KB
-        clear_storage: false,
-        clear_layout: false,
+        num_sectors: 12,     // Sectors are 4KB each on nRF52840 -- 24 sectors = 96KB
+        clear_storage: true,
+        clear_layout: true,
     };
     let rmk_config = RmkConfig {
         device_config: keyboard_device_config,
@@ -225,7 +229,11 @@ async fn main(spawner: Spawner) {
     };
 
     let debouncer = DefaultDebouncer::new();
-    let mut matrix = ::rmk::direct_pin::DirectPinMatrix::<_, _, ROW, COL, SIZE>::new(direct_pins, debouncer, true );    
+    let mut matrix = ::rmk::direct_pin::DirectPinMatrix::<_, _, ROW, COL, SIZE>::new(
+        direct_pins,
+        debouncer,
+        true,
+    );
     let mut keyboard = Keyboard::new(&keymap);
 
     // Initialize the encoder
@@ -240,7 +248,6 @@ async fn main(spawner: Spawner) {
         None,
     );
     let mut batt_proc = BatteryProcessor::new(1000, 1400, &keymap);
-
 
     let mosfet_sk_pwr_ctrl = Output::new(p.P0_25, Level::Low, OutputDrive::Standard);
 
@@ -269,8 +276,8 @@ async fn main(spawner: Spawner) {
         keyboard.run(), // Keyboard is special
         join(
             ble_led.polling_loop(),
-            run_rmk(&keymap, driver, &stack, &mut storage, rmk_config)
-        )
+            run_rmk(&keymap, driver, &stack, &mut storage, rmk_config),
+        ),
     )
     .await;
 }
