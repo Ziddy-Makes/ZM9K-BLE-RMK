@@ -12,52 +12,52 @@ pub(crate) const NUM_ENCODER: usize = 1;
 pub const fn get_default_keymap() -> [[[KeyAction; COL]; ROW]; NUM_LAYER] {
     [
         layer!([
-            [k!(A),                                                                           k!(B),                                                                            k!(MediaPlayPause),                                                                    a!(No)],
-            [wm!(Enter, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)), wm!(Left, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),  wm!(Right, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),       a!(No)],
-            [wm!(Up, ModifierCombination::LCTRL),                                             wm!(Left, ModifierCombination::LCTRL),                                            wm!(Right, ModifierCombination::LCTRL),                                                a!(No)],
-            [lt!(1, KbMute),                                                                  a!(No),                                                                           a!(No),                                                                                a!(No)]
+            [td!(3),                                                                                 k!(B),                                                                                 k!(MediaPlayPause),                                                                                 a!(No)],
+            [wm!(Enter, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),        wm!(Left, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),                wm!(Right, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),                a!(No)],
+            [wm!(Up, ModifierCombination::LCTRL),                                                    wm!(Left, ModifierCombination::LCTRL),                                                         wm!(Right, ModifierCombination::LCTRL),                                                         a!(No)],
+            [lt!(1, KbMute),                                                                         a!(No),                                                                                        a!(No),                                                                                         a!(No)]
         ]),
         layer!([
-            [td!(0),              td!(1),              td!(2),              a!(No)],
-            [a!(No),              a!(No),              a!(No),              a!(No)],
-            [k!(Bootloader),      k!(User5),           k!(User6),           a!(No)],
-            [a!(Transparent),     a!(No),              a!(No),              a!(No)]
+            [td!(0),                                                                                 td!(1),                                                                                        td!(2),                                                                                         a!(No)],
+            [a!(No),                                                                                 a!(No),                                                                                        a!(No),                                                                                         a!(No)],
+            [k!(Bootloader),                                                                         k!(User5),                                                                                     k!(User6),                                                                                      a!(No)],
+            [a!(Transparent),                                                                        a!(No),                                                                                        a!(No),                                                                                         a!(No)]
         ]),
         layer!([
-            [k!(G),               k!(G),               k!(G),               a!(No)],
-            [k!(G),               a!(No),              a!(No),              a!(No)],
-            [k!(G),               a!(No),              a!(No),              a!(No)],
-            [a!(Transparent),     a!(No),              a!(No),              a!(No)]
+            [a!(No),                                                                                 wm!(E, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),                  wm!(T, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),                    a!(No)],
+            [a!(No),                                                                                 wm!(U, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),                  wm!(I, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),                    a!(No)],
+            [a!(No),                                                                                 wm!(J, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),                  wm!(K, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),                    a!(No)],
+            [a!(Transparent),                                                                        a!(No),                                                                                        a!(No),                                                                                         a!(No)]
         ]),
         layer!([
-            [k!(Grave),           k!(F1),              k!(F2),              a!(No)],
-            [a!(No),              a!(No),              a!(No),              a!(No)],
-            [k!(CapsLock),        a!(No),              a!(No),              a!(No)],
-            [k!(CapsLock),        a!(No),              a!(No),              a!(No)]
+            [a!(No),                                                                                 wm!(Kc4, ModifierCombination::new().with_left_ctrl(true).with_left_shift(true).with_left_alt(true)), a!(No),                                                                                   a!(No)],
+            [wm!(D, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),            wm!(F, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),                  wm!(G, ModifierCombination::new().with_left_ctrl(true).with_left_alt(true)),                    a!(No)],
+            [a!(No),                                                                                 a!(No),                                                                                        a!(No),                                                                                         a!(No)],
+            [a!(Transparent),                                                                        a!(No),                                                                                        a!(No),                                                                                         a!(No)]
         ]),
         layer!([
-            [k!(Grave),           k!(F1),              k!(F2),              a!(No)],
-            [a!(No),              a!(No),              a!(No),              a!(No)],
-            [k!(CapsLock),        a!(No),              a!(No),              a!(No)],
-            [k!(CapsLock),        a!(No),              a!(No),              a!(No)]
+            [k!(Grave),                                                                              k!(F1),                                                                                        k!(F2),                                                                                         a!(No)],
+            [a!(No),                                                                                 a!(No),                                                                                        a!(No),                                                                                         a!(No)],
+            [k!(CapsLock),                                                                           a!(No),                                                                                        a!(No),                                                                                         a!(No)],
+            [k!(CapsLock),                                                                           a!(No),                                                                                        a!(No),                                                                                         a!(No)]
         ]),
         layer!([
-            [k!(Grave),           k!(F1),              k!(F2),              a!(No)],
-            [a!(No),              a!(No),              a!(No),              a!(No)],
-            [k!(CapsLock),        a!(No),              a!(No),              a!(No)],
-            [k!(CapsLock),        a!(No),              a!(No),              a!(No)]
+            [k!(Grave),                                                                              k!(F1),                                                                                        k!(F2),                                                                                         a!(No)],
+            [a!(No),                                                                                 a!(No),                                                                                        a!(No),                                                                                         a!(No)],
+            [k!(CapsLock),                                                                           a!(No),                                                                                        a!(No),                                                                                         a!(No)],
+            [k!(CapsLock),                                                                           a!(No),                                                                                        a!(No),                                                                                         a!(No)]
         ]),
         layer!([
-            [k!(Grave),           k!(F1),              k!(F2),              a!(No)],
-            [a!(No),              a!(No),              a!(No),              a!(No)],
-            [k!(CapsLock),        a!(No),              a!(No),              a!(No)],
-            [k!(CapsLock),        a!(No),              a!(No),              a!(No)]
+            [k!(Grave),                                                                              k!(F1),                                                                                        k!(F2),                                                                                         a!(No)],
+            [a!(No),                                                                                 a!(No),                                                                                        a!(No),                                                                                         a!(No)],
+            [k!(CapsLock),                                                                           a!(No),                                                                                        a!(No),                                                                                         a!(No)],
+            [k!(CapsLock),                                                                           a!(No),                                                                                        a!(No),                                                                                         a!(No)]
         ]),
         layer!([
-            [k!(Grave),           k!(F1),              k!(F2),              a!(No)],
-            [a!(No),              a!(No),              a!(No),              a!(No)],
-            [k!(CapsLock),        a!(No),              a!(No),              a!(No)],
-            [k!(CapsLock),        a!(No),              a!(No),              a!(No)]
+            [k!(Grave),                                                                              k!(F1),                                                                                        k!(F2),                                                                                         a!(No)],
+            [a!(No),                                                                                 a!(No),                                                                                        a!(No),                                                                                         a!(No)],
+            [k!(CapsLock),                                                                           a!(No),                                                                                        a!(No),                                                                                         a!(No)],
+            [k!(CapsLock),                                                                           a!(No),                                                                                        a!(No),                                                                                         a!(No)]
         ]),
     ]
 }
@@ -110,8 +110,17 @@ pub fn configure_tapdance(behavior_config: &mut rmk::config::BehaviorConfig) {
 
     //////////////////////////////////////////////////////////////////////////////
 
+    // Tapdance 3: Tap = One Shot Layer 3, Hold = Momentary Layer 2
+    let mut td3 = Morse::default();
+    td3.profile = MorseProfile::new(None, Some(MorseMode::Normal), Some(200), Some(200));
+    td3.put(TAP, Action::OneShotLayer(3));
+    td3.put(HOLD, Action::LayerOn(2));
+
+    //////////////////////////////////////////////////////////////////////////////
+
     // Add tapdance configurations to behavior_config
     let _ = behavior_config.morse.morses.push(td0);
     let _ = behavior_config.morse.morses.push(td1);
     let _ = behavior_config.morse.morses.push(td2);
+    let _ = behavior_config.morse.morses.push(td3);
 }
