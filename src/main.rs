@@ -6,6 +6,7 @@ mod vial;
 mod macros;
 mod keymap;
 mod ble_controller_event_subscriber;
+mod led_animation;
 
 use defmt::{info, unwrap};
 use embassy_executor::Spawner;
@@ -43,6 +44,7 @@ use static_cell::StaticCell;
 use vial::{VIAL_KEYBOARD_DEF, VIAL_KEYBOARD_ID};
 use {defmt_rtt as _, panic_probe as _};
 use ble_controller_event_subscriber::BleConnectionLedController;
+use led_animation::LedAnimator;
 use embassy_time::Timer;
 use smart_leds::{SmartLedsWrite, RGB8};
 use ws2812_spi::Ws2812;
@@ -75,6 +77,7 @@ const L2CAP_MTU: usize = 251;
 const UNLOCK_KEYS: &[(u8, u8)] = &[(0, 0), (0, 1)];
 
 const NUM_LEDS: usize = 9;
+const CUSTOM_PATTERNS: [u8; 4] = [0b01000100, 0b01000111, 0b01110100, 0b01110111];
 
 fn build_sdc<'d, const N: usize>(
     p: nrf_sdc::Peripherals<'d>,
@@ -245,21 +248,16 @@ async fn main(spawner: Spawner) {
 
     let spim = spim::Spim::new(p.SPI3, Irqs, p.P0_21, p.P0_28, p.P0_26, spim_config);
     // Bit pattern that works for nRF52840 at 4MHz
-    let custom_patterns = [0b01000100, 0b01000111, 0b01110100, 0b01110111];
-    let mut ws2812 = Ws2812::new_with_custom_patterns(spim, custom_patterns);
 
-    let mut data = [RGB8::default(); NUM_LEDS];
+    let ws2812 = Ws2812::new_with_custom_patterns(spim, CUSTOM_PATTERNS);
 
-    data[0] = RGB8 { r: 50, g: 0, b: 0 };
-    ws2812.write(data.iter().cloned()).ok();
-    defmt::info!("Red");
-
+    // Run bootup animation
+    let mut led_animator = LedAnimator::<NUM_LEDS>::new(ws2812);
+    led_animator.bootup_animation().await;
+    let ws2812 = led_animator.take();
 
     let led_pin = Output::new(p.P0_06, embassy_nrf::gpio::Level::Low, embassy_nrf::gpio::OutputDrive::Standard);
     let mut ble_led = BleConnectionLedController::<NUM_LEDS>::new(led_pin, ws2812, false);
-
-    //ble_led.event_loop().await;
-    
 
     join4(
         run_devices! (
