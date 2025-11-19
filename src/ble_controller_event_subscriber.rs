@@ -5,22 +5,29 @@ use rmk::channel::ControllerSub;
 use rmk::event::ControllerEvent;
 use rmk::ble::BleState;
 use embassy_nrf::gpio::Output;
+use smart_leds::{SmartLedsWrite, RGB8};
+use ws2812_spi::Ws2812;
+use embassy_nrf::spim::Spim;
 
 
-pub struct BleConnectionLedController<'d> {
+pub struct BleConnectionLedController<'d, const N: usize> {
     pin: Output<'d>,
+    ws2812: Ws2812<Spim<'d>>,
     sub: ControllerSub,
     should_blink: bool,
     low_active: bool,
+    leds_on: bool,
 }
 
-impl<'d> BleConnectionLedController<'d> {
-    pub fn new(pin: Output<'d>, low_active: bool) -> Self {
+impl<'d, const N: usize> BleConnectionLedController<'d, N> {
+    pub fn new(pin: Output<'d>, ws2812: Ws2812<Spim<'d>>, low_active: bool) -> Self {
         Self {
             pin,
+            ws2812,
             sub: unwrap!(CONTROLLER_CHANNEL.subscriber()),
             should_blink: false,
             low_active,
+            leds_on: false,
         }
     }
 
@@ -39,29 +46,43 @@ impl<'d> BleConnectionLedController<'d> {
             self.pin.set_low();
         }
     }
+
+    fn set_all_leds_blue(&mut self) {
+        let data = [RGB8 { r: 43, g: 10, b: 0 }; N];
+        let _ = self.ws2812.write(data.iter().cloned());
+        self.leds_on = true;
+    }
+
+    fn clear_all_leds(&mut self) {
+        let data = [RGB8::default(); N];
+        let _ = self.ws2812.write(data.iter().cloned());
+        self.leds_on = false;
+    }
 }
 
-impl<'d> Controller for BleConnectionLedController<'d> {
+impl<'d, const N: usize> Controller for BleConnectionLedController<'d, N> {
     type Event = ControllerEvent;
 
     async fn process_event(&mut self, event: Self::Event) {
         if let ControllerEvent::BleState(_profile, state) = event {
             match state {
                 BleState::Advertising => {
-                    // Start blinking when advertising
+                    // Start blinking blue when advertising
                     info!("Advertising - Custom Controller");
                     self.should_blink = true;
                 }
                 BleState::Connected => {
-                    // Stop blinking, turn on solid when connected
+                    // Stop blinking, turn off LEDs when connected
                     self.should_blink = false;
                     info!("Connected - Custom Controller");
+                    self.clear_all_leds();
                     self.activate();
                 }
                 BleState::None => {
-                    // Turn off when not in BLE mode
+                    // Turn off LEDs when not in BLE mode
                     self.should_blink = false;
                     info!("None - Custom Controller");
+                    self.clear_all_leds();
                     self.deactivate();
                 }
             }
@@ -73,12 +94,17 @@ impl<'d> Controller for BleConnectionLedController<'d> {
     }
 }
 
-impl<'d> PollingController for BleConnectionLedController<'d> {
+impl<'d, const N: usize> PollingController for BleConnectionLedController<'d, N> {
     const INTERVAL: embassy_time::Duration = embassy_time::Duration::from_millis(500);
 
     async fn update(&mut self) {
         if self.should_blink {
             self.pin.toggle();
+            if self.leds_on {
+                self.clear_all_leds();
+            } else {
+                self.set_all_leds_blue();
+            }
         }
     }
 }

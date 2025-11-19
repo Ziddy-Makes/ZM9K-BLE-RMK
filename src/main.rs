@@ -37,7 +37,7 @@ use rmk::input_device::adc::{AnalogEventType, NrfAdc};
 use rmk::input_device::battery::BatteryProcessor;
 use rmk::input_device::rotary_encoder::{RotaryEncoder};
 use rmk::keyboard::Keyboard;
-use rmk::controller::EventController;
+use rmk::controller::{EventController, PollingController};
 use rmk::{HostResources, initialize_encoder_keymap_and_storage, run_devices, run_processor_chain, run_rmk};
 use static_cell::StaticCell;
 use vial::{VIAL_KEYBOARD_DEF, VIAL_KEYBOARD_ID};
@@ -237,7 +237,8 @@ async fn main(spawner: Spawner) {
     let mut batt_proc = BatteryProcessor::new(2000, 2806, &keymap);
 
 
-    let sk_pwr = Output::new(p.P0_25, Level::High, OutputDrive::Standard);
+    let mut sk_pwr = Output::new(p.P0_25, Level::Low, OutputDrive::Standard);
+    sk_pwr.set_high();
 
     let mut spim_config = spim::Config::default();
     spim_config.frequency = spim::Frequency::M4;
@@ -255,7 +256,7 @@ async fn main(spawner: Spawner) {
 
 
     let led_pin = Output::new(p.P0_06, embassy_nrf::gpio::Level::Low, embassy_nrf::gpio::OutputDrive::Standard);
-    let mut ble_led = BleConnectionLedController::new(led_pin, false);
+    let mut ble_led = BleConnectionLedController::<NUM_LEDS>::new(led_pin, ws2812, false);
 
     //ble_led.event_loop().await;
     
@@ -269,7 +270,7 @@ async fn main(spawner: Spawner) {
         },
         keyboard.run(), // Keyboard is special
         join(
-            ble_led.event_loop(),
+            ble_led.polling_loop(),
             run_rmk(&keymap, driver, &stack, &mut storage, rmk_config)
         )
     )
