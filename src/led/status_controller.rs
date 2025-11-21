@@ -11,7 +11,7 @@ use rmk::types::keycode::KeyCode;
 use smart_leds::{RGB8, SmartLedsWrite};
 use ws2812_spi::Ws2812;
 
-pub struct BleConnectionLedController<'d, const N: usize> {
+pub struct StatusLedController<'d, const N: usize> {
     ws2812: Ws2812<Spim<'d>>,
     power_pin: Output<'d>,
     sub: ControllerSub,
@@ -23,7 +23,7 @@ pub struct BleConnectionLedController<'d, const N: usize> {
     user7_held: bool,
 }
 
-impl<'d, const N: usize> BleConnectionLedController<'d, N> {
+impl<'d, const N: usize> StatusLedController<'d, N> {
     pub fn new(ws2812: Ws2812<Spim<'d>>, power_pin: Output<'d>) -> Self {
         Self {
             ws2812,
@@ -41,7 +41,7 @@ impl<'d, const N: usize> BleConnectionLedController<'d, N> {
     fn blink_ble_profile_led_blue(&mut self) {
         self.power_pin.set_high();
         let mut data = [RGB8 { r: 0, g: 0, b: 0 }; N];
-        data[self.current_ble_profile as usize] = RGB8 { r: 0, g: 0, b: 45 };
+        data[self.current_ble_profile as usize] = RGB8 { r: 0, g: 0, b: 70 };
         let _ = self.ws2812.write(data.iter().cloned());
         self.leds_on = true;
     }
@@ -49,7 +49,7 @@ impl<'d, const N: usize> BleConnectionLedController<'d, N> {
     fn blink_ble_profile_led_green(&mut self) {
         self.power_pin.set_high();
         let mut data = [RGB8 { r: 0, g: 0, b: 0 }; N];
-        data[self.current_ble_profile as usize] = RGB8 { r: 0, g: 50, b: 0 };
+        data[self.current_ble_profile as usize] = RGB8 { r: 0, g: 70, b: 0 };
         let _ = self.ws2812.write(data.iter().cloned());
         self.leds_on = true;
     }
@@ -77,9 +77,9 @@ impl<'d, const N: usize> BleConnectionLedController<'d, N> {
 
         // Choose color based on battery level: red if under 30%, green otherwise
         let led_color = if self.battery_percentage < 30 {
-            RGB8 { r: 50, g: 0, b: 0 } // Red for low battery
+            RGB8 { r: 70, g: 0, b: 0 } // Red for low battery
         } else {
-            RGB8 { r: 0, g: 50, b: 0 } // Green for normal battery
+            RGB8 { r: 0, g: 70, b: 0 } // Green for normal battery
         };
 
         // Create LED array and light up the first num_leds
@@ -104,7 +104,7 @@ impl<'d, const N: usize> BleConnectionLedController<'d, N> {
     }
 }
 
-impl<'d, const N: usize> Controller for BleConnectionLedController<'d, N> {
+impl<'d, const N: usize> Controller for StatusLedController<'d, N> {
     type Event = ControllerEvent;
 
     async fn process_event(&mut self, event: Self::Event) {
@@ -176,7 +176,7 @@ impl<'d, const N: usize> Controller for BleConnectionLedController<'d, N> {
     }
 }
 
-impl<'d, const N: usize> PollingController for BleConnectionLedController<'d, N> {
+impl<'d, const N: usize> PollingController for StatusLedController<'d, N> {
     const INTERVAL: embassy_time::Duration = embassy_time::Duration::from_millis(700);
 
     async fn update(&mut self) {

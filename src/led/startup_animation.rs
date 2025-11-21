@@ -4,12 +4,12 @@ use embassy_time::Timer;
 use smart_leds::{RGB8, SmartLedsWrite};
 use ws2812_spi::Ws2812;
 
-pub struct LedAnimator<'d, const N: usize> {
+pub struct StartupAnimator<'d, const N: usize> {
     ws2812: Ws2812<Spim<'d>>,
     power_pin: Output<'d>,
 }
 
-impl<'d, const N: usize> LedAnimator<'d, N> {
+impl<'d, const N: usize> StartupAnimator<'d, N> {
     pub fn new(ws2812: Ws2812<Spim<'d>>, power_pin: Output<'d>) -> Self {
         Self { ws2812, power_pin }
     }

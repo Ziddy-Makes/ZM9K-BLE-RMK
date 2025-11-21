@@ -4,9 +4,8 @@
 mod vial;
 #[macro_use]
 mod macros;
-mod ble_controller_event_subscriber;
 mod keymap;
-mod led_animation;
+mod led;
 
 use defmt::{info, unwrap};
 use embassy_executor::Spawner;
@@ -20,9 +19,8 @@ use embassy_nrf::usb::Driver;
 use embassy_nrf::usb::vbus_detect::HardwareVbusDetect;
 use embassy_nrf::{Peri, bind_interrupts, pac, peripherals, rng, spim, usb};
 
-use ble_controller_event_subscriber::BleConnectionLedController;
 use keymap::{COL, ROW, SIZE};
-use led_animation::LedAnimator;
+use led::{StartupAnimator, StatusLedController};
 use nrf_mpsl::Flash;
 use nrf_sdc::mpsl::MultiprotocolServiceLayer;
 use nrf_sdc::{self as sdc, mpsl};
@@ -260,11 +258,11 @@ async fn main(spawner: Spawner) {
     let ws2812 = Ws2812::new(spim);
 
     // Run bootup animation
-    let mut led_animator = LedAnimator::<NUM_LEDS>::new(ws2812, mosfet_sk_pwr_ctrl);
-    led_animator.bootup_animation().await;
-    let (ws2812, mosfet_sk_pwr_ctrl) = led_animator.take();
+    let mut startup_animator = StartupAnimator::<NUM_LEDS>::new(ws2812, mosfet_sk_pwr_ctrl);
+    startup_animator.bootup_animation().await;
+    let (ws2812, mosfet_sk_pwr_ctrl) = startup_animator.take();
 
-    let mut ble_led = BleConnectionLedController::<NUM_LEDS>::new(ws2812, mosfet_sk_pwr_ctrl);
+    let mut status_led = StatusLedController::<NUM_LEDS>::new(ws2812, mosfet_sk_pwr_ctrl);
 
     join4(
         run_devices! (
@@ -275,7 +273,7 @@ async fn main(spawner: Spawner) {
         },
         keyboard.run(), // Keyboard is special
         join(
-            ble_led.polling_loop(),
+            status_led.polling_loop(),
             run_rmk(&keymap, driver, &stack, &mut storage, rmk_config),
         ),
     )
