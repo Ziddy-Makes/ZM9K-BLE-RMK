@@ -78,7 +78,6 @@ const L2CAP_MTU: usize = 251;
 const UNLOCK_KEYS: &[(u8, u8)] = &[(0, 0), (0, 1)];
 
 const NUM_LEDS: usize = 9;
-const CUSTOM_PATTERNS: [u8; 4] = [0b01000100, 0b01000111, 0b01110100, 0b01110111];
 
 fn build_sdc<'d, const N: usize>(
     p: nrf_sdc::Peripherals<'d>,
@@ -160,9 +159,6 @@ async fn main(spawner: Spawner) {
     // Initialize flash
     let flash = Flash::take(mpsl, p.NVMC);
 
-    // Initialize IO Pins
-    // let (row_pins, col_pins) = config_matrix_pins_nrf!(peripherals: p, input: [P0_30, P0_31, P0_29, P0_27, P1_13], output:  [P0_28, P0_03, P1_10, P0_02, P0_06, P1_11, P0_13, P0_24, P0_09, P0_10, P1_00, P1_02, P1_03, P1_05]);
-
     // Initialize the ADC.
     // We are only using one channel for detecting battery level
     let adc_pin = p.P0_04.degrade_saadc();
@@ -185,8 +181,8 @@ async fn main(spawner: Spawner) {
     let storage_config = StorageConfig {
         start_addr: 0xA0000, // FIXME: use 0x70000 after we can build without softdevice controller
         num_sectors: 12,     // Sectors are 4KB each on nRF52840 -- 24 sectors = 96KB
-        clear_storage: true,
-        clear_layout: true,
+        clear_storage: false,
+        clear_layout: false,
     };
     let rmk_config = RmkConfig {
         device_config: keyboard_device_config,
@@ -204,6 +200,9 @@ async fn main(spawner: Spawner) {
 
     // Configure tapdance behaviors
     keymap::configure_tapdance(&mut behavior_config);
+
+    // Configure macros
+    keymap::configure_macros(&mut behavior_config);
 
     let mut encoder_map = keymap::get_default_encoder_map();
     let (keymap, mut storage) = initialize_encoder_keymap_and_storage(
@@ -257,7 +256,8 @@ async fn main(spawner: Spawner) {
     let spim = spim::Spim::new(p.SPI3, Irqs, p.P0_21, p.P0_28, p.P0_26, spim_config);
     // Bit pattern that works for nRF52840 at 4MHz
 
-    let ws2812 = Ws2812::new_with_custom_patterns(spim, CUSTOM_PATTERNS);
+    // let ws2812 = Ws2812::new_with_custom_patterns(spim, CUSTOM_PATTERNS);
+    let ws2812 = Ws2812::new(spim);
 
     // Run bootup animation
     let mut led_animator = LedAnimator::<NUM_LEDS>::new(ws2812, mosfet_sk_pwr_ctrl);
