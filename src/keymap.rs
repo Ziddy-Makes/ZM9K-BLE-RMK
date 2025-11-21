@@ -32,7 +32,7 @@ pub const fn get_default_keymap() -> [[[KeyAction; COL]; ROW]; NUM_LAYER] {
         ]),
         layer!([
             [td!(0),               td!(1),                      td!(2),                  a!(No)],
-            [a!(No),               a!(No),                      a!(No),                  a!(No)],
+            [a!(No),               a!(No),                      k!(User7),              a!(No)],
             [k!(Bootloader),       k!(User5),                   k!(User6),               a!(No)],
             [a!(Transparent),      a!(No),                      a!(No),                  a!(No)]
         ]),
@@ -123,19 +123,10 @@ pub fn configure_tapdance(behavior_config: &mut rmk::config::BehaviorConfig) {
 
     //////////////////////////////////////////////////////////////////////////////
 
-    // Tapdance 3: Tap = One Shot Layer 3, Hold = Momentary Layer 2
-    let mut td3 = Morse::default();
-    td3.profile = MorseProfile::new(None, Some(MorseMode::Normal), Some(200), Some(200));
-    td3.put(TAP, Action::OneShotLayer(3));
-    td3.put(HOLD, Action::LayerOn(2));
-
-    //////////////////////////////////////////////////////////////////////////////
-
     // Add tapdance configurations to behavior_config
     let _ = behavior_config.morse.morses.push(td0);
     let _ = behavior_config.morse.morses.push(td1);
     let _ = behavior_config.morse.morses.push(td2);
-    let _ = behavior_config.morse.morses.push(td3);
 }
 
 /// Configure keyboard macros

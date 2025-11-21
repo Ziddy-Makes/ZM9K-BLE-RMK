@@ -38,6 +38,11 @@
             "name": "SWITCH",
             "title": "Switch default output mode between USB/BLE",
             "shortName": "Switch\nOutput"
+        },
+        {
+            "name": "BAT_CHK",
+            "title": "Check Battery Level (hold to show battery on LEDs)",
+            "shortName": "Battery\nCheck"
         }
     ],
     "matrix": {
