@@ -15,6 +15,13 @@ const CTRL_SHIFT_GUI: ModifierCombination = ModifierCombination::new()
     .with_left_shift(true)
     .with_left_gui(true);
 
+const BLE1: KeyCode = KeyCode::User0;
+const BLE2: KeyCode = KeyCode::User1;
+const BLE3: KeyCode = KeyCode::User2;
+const BLE_CLR: KeyCode = KeyCode::User5;
+const USB_BLE_SW: KeyCode = KeyCode::User6;
+const BATT_CHECK: KeyCode = KeyCode::User7;
+
 pub(crate) const COL: usize = 4;
 pub(crate) const ROW: usize = 4;
 pub(crate) const SIZE: usize = 16; // Rows * Cols
@@ -32,8 +39,8 @@ pub const fn get_default_keymap() -> [[[KeyAction; COL]; ROW]; NUM_LAYER] {
         ]),
         layer!([
             [td!(0),               td!(1),                      td!(2),                  a!(No)],
-            [a!(No),               a!(No),                      k!(User7),              a!(No)],
-            [k!(Bootloader),       k!(User5),                   k!(User6),               a!(No)],
+            [k!(User5),            a!(No),                      k!(User7),               a!(No)],
+            [k!(Bootloader),       a!(No),                      k!(User6),               a!(No)],
             [a!(Transparent),      a!(No),                      a!(No),                  a!(No)]
         ]),
         layer!([
