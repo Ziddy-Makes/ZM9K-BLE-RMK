@@ -170,7 +170,7 @@ async fn main(spawner: Spawner) {
         vid: 0x7c4b,
         pid: 0x364a,
         manufacturer: "Ziddy Makes",
-        product_name: "ZM9K-BLE-RMK",
+        product_name: "ZM9K-BLE-RMK-C",
         serial_number: "vial:f64c2b3c:000001",
     };
     let vial_config = VialConfig::new(VIAL_KEYBOARD_ID, VIAL_KEYBOARD_DEF, UNLOCK_KEYS);
