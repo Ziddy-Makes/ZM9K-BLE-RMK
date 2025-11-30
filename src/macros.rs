@@ -40,3 +40,14 @@ macro_rules! config_matrix_pin_nrf {
         Some(Input::new($p.$pin, embassy_nrf::gpio::Pull::Up))
     };
 }
+
+/// Create a key action from a KeyCode expression (constant or variant path)
+/// Works with constants (like `BLE1`, `BATT_CHECK`) or variant paths (like `KeyCode::User0`)
+/// Usage: 
+///   - `kc!(BLE1)` for constants
+///   - `kc!(KeyCode::A)` for variant names
+macro_rules! kc {
+    ($k:expr) => {
+        rmk::types::action::KeyAction::Single(rmk::types::action::Action::Key($k))
+    };
+}

@@ -1,16 +1,16 @@
-use rmk::keyboard_macros::{MacroOperation, define_macro_sequences};
+use rmk::keyboard_macros::{define_macro_sequences, to_macro_sequence};
 use rmk::morse::Morse;
 use rmk::types::action::{Action, EncoderAction, KeyAction, MorseMode, MorseProfile};
 use rmk::types::keycode::KeyCode;
 use rmk::types::modifier::ModifierCombination;
-use rmk::{a, encoder, k, layer, lt, td, wm};
+use rmk::{a, encoder, k, layer, lt, td};
 
 // Modifier combination aliases
-const LCTRL: ModifierCombination = ModifierCombination::LCTRL;
-const CTRL_ALT: ModifierCombination = ModifierCombination::new()
+const _LCTRL: ModifierCombination = ModifierCombination::LCTRL;
+const _CTRL_ALT: ModifierCombination = ModifierCombination::new()
     .with_left_ctrl(true)
     .with_left_alt(true);
-const CTRL_SHIFT_GUI: ModifierCombination = ModifierCombination::new()
+const _CTRL_SHIFT_GUI: ModifierCombination = ModifierCombination::new()
     .with_left_ctrl(true)
     .with_left_shift(true)
     .with_left_gui(true);
@@ -35,13 +35,13 @@ pub const fn get_default_keymap() -> [[[KeyAction; COL]; ROW]; NUM_LAYER] {
             [td!(3),               k!(B),                       k!(MediaPlayPause),      a!(No)],
             [wm!(Enter, CTRL_ALT), wm!(Left, CTRL_ALT),         wm!(Right, CTRL_ALT),    a!(No)],
             [wm!(Up, LCTRL),       wm!(Left, LCTRL),            wm!(Right, LCTRL),       a!(No)],
-            [lt!(1, KbMute),       a!(No),                      a!(No),                  a!(No)]
+            [lt!(1, AudioMute),        a!(No),                     a!(No),                 a!(No)]
         ]),
         layer!([
-            [td!(0),               td!(1),                      td!(2),                  a!(No)],
-            [k!(User5),            a!(No),                      k!(User7),               a!(No)],
-            [k!(Bootloader),       a!(No),                      k!(User6),               a!(No)],
-            [a!(Transparent),      a!(No),                      a!(No),                  a!(No)]
+            [kc!(BLE1),                kc!(BLE2),                  kc!(BLE3),                 a!(No)],
+            [td!(0),                   a!(No),                     kc!(BATT_CHECK),           a!(No)],
+            [td!(1),                   a!(No),                     kc!(USB_BLE_SW),           a!(No)],
+            [a!(Transparent),          a!(No),                     a!(No),                    a!(No)]
         ]),
         layer!([
             [a!(No),               wm!(E, CTRL_ALT),            wm!(T, CTRL_ALT),        a!(No)],
@@ -56,28 +56,28 @@ pub const fn get_default_keymap() -> [[[KeyAction; COL]; ROW]; NUM_LAYER] {
             [a!(Transparent),      a!(No),                      a!(No),                  a!(No)]
         ]),
         layer!([
-            [k!(Grave),            k!(F1),                      k!(F2),                  a!(No)],
-            [a!(No),               a!(No),                      a!(No),                  a!(No)],
-            [k!(CapsLock),         a!(No),                      a!(No),                  a!(No)],
-            [k!(CapsLock),         a!(No),                      a!(No),                  a!(No)]
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)]
         ]),
         layer!([
-            [k!(Grave),            k!(F1),                      k!(F2),                  a!(No)],
-            [a!(No),               a!(No),                      a!(No),                  a!(No)],
-            [k!(CapsLock),         a!(No),                      a!(No),                  a!(No)],
-            [k!(CapsLock),         a!(No),                      a!(No),                  a!(No)]
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)]
         ]),
         layer!([
-            [k!(Grave),            k!(F1),                      k!(F2),                  a!(No)],
-            [a!(No),               a!(No),                      a!(No),                  a!(No)],
-            [k!(CapsLock),         a!(No),                      a!(No),                  a!(No)],
-            [k!(CapsLock),         a!(No),                      a!(No),                  a!(No)]
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)]
         ]),
         layer!([
-            [k!(Grave),            k!(F1),                      k!(F2),                  a!(No)],
-            [a!(No),               a!(No),                      a!(No),                  a!(No)],
-            [k!(CapsLock),         a!(No),                      a!(No),                  a!(No)],
-            [k!(CapsLock),         a!(No),                      a!(No),                  a!(No)]
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)]
         ]),
     ]
 }
@@ -101,7 +101,7 @@ pub fn configure_tapdance(behavior_config: &mut rmk::config::BehaviorConfig) {
     use rmk::morse::{HOLD, TAP};
     use rmk::types::keycode::KeyCode;
 
-    // Example tapdance 0: Single tap = Space, Double tap = Enter, Hold = Shift
+    // Tapdance 0
     let mut td0 = Morse::default();
     td0.profile = MorseProfile::new(
         None,                    // Use default unilateral_tap
@@ -109,20 +109,19 @@ pub fn configure_tapdance(behavior_config: &mut rmk::config::BehaviorConfig) {
         Some(200),               // 200ms hold timeout
         Some(200),               // 200ms gap timeout
     );
-    td0.put(TAP, Action::Key(KeyCode::User0));
-    td0.put(HOLD, Action::Key(KeyCode::User5));
+    td0.put(HOLD, Action::Key(BLE_CLR));
 
     //////////////////////////////////////////////////////////////////////////////
 
-    // Example tapdance 1: Single tap = Escape, Double tap = Grave, Hold = Layer 1
+    // Tapdance 1
     let mut td1 = Morse::default();
     td1.profile = MorseProfile::new(None, Some(MorseMode::Normal), Some(200), Some(200));
-    td1.put(TAP, Action::Key(KeyCode::User1));
-    td1.put(HOLD, Action::Key(KeyCode::User5));
+    td1.put(HOLD, Action::Key(KeyCode::Bootloader));
+
 
     //////////////////////////////////////////////////////////////////////////////
 
-    // Example tapdance 2: Single tap = Tab, Double tap = Backspace, Hold = Ctrl
+    // Tapdance 2
     let mut td2 = Morse::default();
     td2.profile = MorseProfile::new(None, Some(MorseMode::Normal), Some(200), Some(200));
     td2.put(TAP, Action::Key(KeyCode::User2));
@@ -142,17 +141,8 @@ pub fn configure_macros(behavior_config: &mut rmk::config::BehaviorConfig) {
     // Use in Keymap array
     // KeyAction::Single(Action::TriggerMacro(0))
 
-    use rmk::heapless::Vec;
-
-    // Macro 0: Hold Ctrl+Shift+Alt+Gui, tap 4, release all modifiers
-    let mut macro0 = Vec::<MacroOperation, 2048>::new();
-    let _ = macro0.push(MacroOperation::Press(KeyCode::LCtrl));
-    let _ = macro0.push(MacroOperation::Press(KeyCode::LShift));
-    let _ = macro0.push(MacroOperation::Press(KeyCode::LGui));
-    let _ = macro0.push(MacroOperation::Tap(KeyCode::Kc4));
-    let _ = macro0.push(MacroOperation::Release(KeyCode::LGui));
-    let _ = macro0.push(MacroOperation::Release(KeyCode::LShift));
-    let _ = macro0.push(MacroOperation::Release(KeyCode::LCtrl));
+    // Macro 0: Text macro example
+    let macro0 = to_macro_sequence("Ziddy Makes was here (:");
 
     // Create macro sequences array and define them
     let macro_sequences = [macro0];
