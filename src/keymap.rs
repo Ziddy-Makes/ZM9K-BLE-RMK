@@ -32,9 +32,9 @@ pub(crate) const NUM_ENCODER: usize = 1;
 pub const fn get_default_keymap() -> [[[KeyAction; COL]; ROW]; NUM_LAYER] {
     [
         layer!([
-            [td!(3),               k!(B),                       k!(MediaPlayPause),      a!(No)],
-            [wm!(Enter, CTRL_ALT), wm!(Left, CTRL_ALT),         wm!(Right, CTRL_ALT),    a!(No)],
-            [wm!(Up, LCTRL),       wm!(Left, LCTRL),            wm!(Right, LCTRL),       a!(No)],
+            [k!(A),                    k!(B),                      k!(C),                  a!(No)],
+            [k!(D),                    k!(E),                      k!(F),                  a!(No)],
+            [k!(G),                    k!(H),                      k!(I),                  a!(No)],
             [lt!(1, AudioMute),        a!(No),                     a!(No),                 a!(No)]
         ]),
         layer!([
@@ -44,16 +44,16 @@ pub const fn get_default_keymap() -> [[[KeyAction; COL]; ROW]; NUM_LAYER] {
             [a!(Transparent),          a!(No),                     a!(No),                    a!(No)]
         ]),
         layer!([
-            [a!(No),               wm!(E, CTRL_ALT),            wm!(T, CTRL_ALT),        a!(No)],
-            [a!(No),               wm!(U, CTRL_ALT),            wm!(I, CTRL_ALT),        a!(No)],
-            [a!(No),               wm!(J, CTRL_ALT),            wm!(K, CTRL_ALT),        a!(No)],
-            [a!(Transparent),      a!(No),                      a!(No),                  a!(No)]
+            [k!(J),                    k!(K),                      k!(L),                  a!(No)],
+            [k!(M),                    k!(N),                      k!(O),                  a!(No)],
+            [k!(P),                    k!(Q),                      k!(R),                  a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)]
         ]),
         layer!([
-            [a!(No),               wm!(Kc4, CTRL_SHIFT_GUI),    a!(No),                  a!(No)],
-            [wm!(D, CTRL_ALT),     wm!(F, CTRL_ALT),            wm!(G, CTRL_ALT),        a!(No)],
-            [a!(No),               a!(No),                      a!(No),                  a!(No)],
-            [a!(Transparent),      a!(No),                      a!(No),                  a!(No)]
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)],
+            [a!(No),                   a!(No),                     a!(No),                 a!(No)]
         ]),
         layer!([
             [a!(No),                   a!(No),                     a!(No),                 a!(No)],
