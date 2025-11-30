@@ -167,8 +167,8 @@ async fn main(spawner: Spawner) {
 
     // Keyboard config
     let keyboard_device_config = DeviceConfig {
-        vid: 0x4c4b,
-        pid: 0x4643,
+        vid: 0x7c4b,
+        pid: 0x364a,
         manufacturer: "Ziddy Makes",
         product_name: "ZM9K-BLE-RMK",
         serial_number: "vial:f64c2b3c:000001",
