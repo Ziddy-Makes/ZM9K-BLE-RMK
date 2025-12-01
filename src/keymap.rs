@@ -84,7 +84,7 @@ pub const fn get_default_keymap() -> [[[KeyAction; COL]; ROW]; NUM_LAYER] {
 
 pub const fn get_default_encoder_map() -> [[EncoderAction; NUM_ENCODER]; NUM_LAYER] {
     [
-        [encoder!(k!(KbVolumeUp), k!(KbVolumeDown))],
+        [encoder!(k!(AudioVolUp), k!(AudioVolDown))],
         [encoder!(k!(No), k!(No))],
         [encoder!(k!(No), k!(No))],
         [encoder!(k!(No), k!(No))],
