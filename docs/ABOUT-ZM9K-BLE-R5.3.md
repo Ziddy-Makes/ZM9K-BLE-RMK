@@ -64,11 +64,11 @@ Direct Pin Matrix Configuration (Columns are left to right, Rows are top to bott
 - Last is bottom Right
 
 #### Data
-First SK6812MINI-E / WS2812B is connected to Pin `P0_26`
+First SK6812MINI-E / WS2812B is connected to Pin `P0_26` (SK_LEDS)
 - Which is running SPI at 4MHz with some bit pattern manipulation to match the WS2812B's clock requirements
 
 #### Power Control
-Non Inverting Control PMOS High Side Switch Circuit
+Non Inverting Control PMOS High Side Switch Circuit toggles the power to the SK6812MINI-E / WS2812B LEDs (LED_VCC)
 
 - Pin `P0_25`
   - Where

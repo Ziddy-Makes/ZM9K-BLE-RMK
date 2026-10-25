@@ -2637,7 +2637,8 @@ dependencies = [
 [[package]]
 name = "ws2812-spi"
 version = "0.5.1"
-source = "git+https://github.com/aziddy/ws2812-spi-rs?branch=nrf52840_at4Mhz_support#cfd49a4aa166e3f7c61cd6bb2e894fc55b21da3e"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b2fd98e2b649252eced2ec3aa8d5048e7d2ac294276b0567939bbf47741f9934"
 dependencies = [
  "embedded-hal 1.0.0",
  "smart-leds-trait",

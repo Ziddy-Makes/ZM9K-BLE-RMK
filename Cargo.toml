@@ -58,7 +58,7 @@ async-trait = "0.1.88"
 ## Custom Added Dependencies
 
 smart-leds = "0.4"
-ws2812-spi = { git = "https://github.com/aziddy/ws2812-spi-rs", branch = "nrf52840_at4Mhz_support" }
+ws2812-spi = "0.5.1"
 
 # For math functions (optional, for breathing effect)
 libm = "0.2"
